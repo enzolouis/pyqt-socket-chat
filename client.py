@@ -220,7 +220,6 @@ class MWindow(QWidget, threading.Thread):
         self.client_sock.send(to_send.encode("utf8"))
         
         if msg == "/quit":
-            self.client_sock.close()
             app.quit()
 
 
