@@ -1,0 +1,5 @@
+{
+	"HOST_CLIENT":"your IPV4, open shell, type ipconfig and you get that",
+	"PORT": 6666,
+	"BUFSIZ": 1024
+}
