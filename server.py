@@ -18,7 +18,7 @@ class ServerIO(threading.Thread):
 
         self.clients = {}
         self.commands = ["/quit"]
-        self.anti_commands = [("\\"+command) for command in self.commands]
+        self.no_commands = [("\\"+command) for command in self.commands]
 
         self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_sock.bind(("", PORT))
@@ -61,12 +61,10 @@ class ServerIO(threading.Thread):
 
                 print("server receive")
 
-                if msg in self.anti_commands:
-                    print(f"anti_commands by {name}")
+                if msg in self.no_commands:
                     self.send_all_client(f"/{msg[2:]}", name+": ")
 
                 elif msg == self.commands[0]:
-                    print(f"commands by {name}")
                     #client.send("/quit", "utf8"))
                     client.close()
                     self.clients.pop(client)
@@ -74,7 +72,6 @@ class ServerIO(threading.Thread):
                     self.send_all_client(f"<YOTfb3po7lBNv19in6yC> / {len(self.clients)}")
                     break
                 else:
-                    print(f"no commands by {name}")
                     self.send_all_client(msg, name+": ")
             except OSError:
                 break

@@ -150,12 +150,10 @@ class MWindow(QWidget, threading.Thread):
         if ":" not in item:
             return
 
-        islink = item[item.index(":")+1:].strip() # ajouter un QWidgetItem.signal if selected().startswith("https://") : open_new("...")
-        print(f"isLink -> {islink}")
+        islink = item[item.index(":")+1:].strip() # in future add a QWidgetItem.signal if selected().startswith("https://") : open_new("...")
 
 
         if islink.startswith("http://") or islink.startswith("https://"):
-            print('addListItem https')
             listitem = self.listwidget.item(self.lastrow)
             listitem.setForeground(QBrush(QColor("blue")))
             #listitem.clicked.connect(lambda:self.openLink(islink))
@@ -169,8 +167,6 @@ class MWindow(QWidget, threading.Thread):
         while True:
             try:
                 msg = self.client_sock.recv(self.BUFSIZ).decode("utf8")
-
-                print("receive")
                 msg_split = msg.split(":")
                 author = msg_split[0]
                 message = "".join(msg_split[1:]).strip()
