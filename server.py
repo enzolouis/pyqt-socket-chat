@@ -65,7 +65,6 @@ class ServerIO(threading.Thread):
                     self.send_all_client(f"/{msg[2:]}", name+": ")
 
                 elif msg == self.commands[0]:
-                    #client.send("/quit", "utf8"))
                     client.close()
                     self.clients.pop(client)
                     self.send_all_client(f"{name} has left the chat.")
