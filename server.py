@@ -22,6 +22,21 @@ class ServerIO(threading.Thread):
 
         self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_sock.bind(("", PORT))
+        self.server_sock.listen(5)
+
+        while True:
+            try:
+
+                client, client_address = self.server_sock.accept()
+                
+                print(f"+1 client -> {client_address}")
+                client.send(f"{'Room is empty' if not self.clients else f'Room has {len(self.clients)} player'} ! Type your name and press enter to join !".encode("utf8"))
+
+                self.send_all_client("A player is on the lobby")
+
+                threading.Thread(target=self.manage_client_protocol, args=(client,)).start()
+            except Exception as e:
+                print(e, type(e))
 
     def run(self):
         """Gère l'arrivée du client, puis le mène vers le tchat"""
@@ -81,14 +96,16 @@ class ServerIO(threading.Thread):
         for sock in self.clients:
             sock.send((member+msg).encode("utf-8"))
 
+
+
 if __name__ == "__main__":
     
     server = ServerIO()
 
-    server.server_sock.listen(5)  # maximum : 5 instances de client
+    #server.server_sock.listen(5)  # maximum : 5 instances de client
     
     print("Server on\n"+"-"*50)
 
-    server.start()
-    server.join() # join pour attendre la fin du thread avant de fermer le socket
+    #server.start()
+    #server.join() # join pour attendre la fin du thread avant de fermer le socket
     server.server_sock.close()
