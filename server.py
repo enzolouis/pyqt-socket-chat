@@ -1,60 +1,48 @@
-import json
+import yaml
 import threading
 import socket
 
 # commentaire à refaire en anglais.
 
-class ServerIO(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
+class ServerIO(socket.socket):
+    clients = {}
 
-        with open("config.json", "r") as file:
-            config = json.load(file)
+    def __init__(self, *args, **kwargs):
+        socket.socket.__init__(self, *args, **kwargs)
 
+        with open("config.yaml", "r") as file:
+            config = yaml.load(file, Loader=yaml.Loader)
 
         PORT = config["PORT"]
-
         self.BUFSIZ = config["BUFSIZ"]
 
         self.clients = {}
-        self.commands = ["/quit"]
+        self.commands = ["/quit", "/color"]
         self.no_commands = [("\\"+command) for command in self.commands]
 
-        self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_sock.bind(("", PORT))
-        self.server_sock.listen(5)
+        # self.server_sock = socket.socket()
 
-        while True:
-            try:
+        self.bind(("", PORT))
+        self.listen(5)
 
-                client, client_address = self.server_sock.accept()
-                
-                print(f"+1 client -> {client_address}")
-                client.send(f"{'Room is empty' if not self.clients else f'Room has {len(self.clients)} player'} ! Type your name and press enter to join !".encode("utf8"))
-
-                self.send_all_client("A player is on the lobby")
-
-                threading.Thread(target=self.manage_client_protocol, args=(client,)).start()
-            except Exception as e:
-                print(e, type(e))
-
-    def run(self):
+    def accept_(self): # collisions -> socket.socket.accept
+        print("ACCEPT INCOMING")
         """Gère l'arrivée du client, puis le mène vers le tchat"""
         while True:
+            print("ACCEPT => .")
             try:
-
-                client, client_address = self.server_sock.accept()
+                client, client_address = self.accept()
                 
                 print(f"+1 client -> {client_address}")
                 client.send(f"{'Room is empty' if not self.clients else f'Room has {len(self.clients)} player'} ! Type your name and press enter to join !".encode("utf8"))
 
                 self.send_all_client("A player is on the lobby")
 
-                threading.Thread(target=self.manage_client_protocol, args=(client,)).start()
+                threading.Thread(target=self.manage_client_protocol, args=(client, client_address)).start()
             except Exception as e:
                 print(e, type(e))
 
-    def manage_client_protocol(self, client):
+    def manage_client_protocol(self, client, address):
         """Gère le parcours du client, de l'inscription à son départ"""
 
 
@@ -68,6 +56,7 @@ class ServerIO(threading.Thread):
         self.send_all_client(f"--> {name} has joined the chat ! We are now {len(self.clients) + 1}")
 
         self.clients[client] = name
+        self.__class__.clients[client] = name
 
         self.send_all_client(f"<YOTfb3po7lBNv19in6yC> / {len(self.clients)}")
         while True:
@@ -82,8 +71,10 @@ class ServerIO(threading.Thread):
                 elif msg == self.commands[0]:
                     client.close()
                     self.clients.pop(client)
+                    self.__class__.clients.pop(client)
                     self.send_all_client(f"{name} has left the chat.")
                     self.send_all_client(f"<YOTfb3po7lBNv19in6yC> / {len(self.clients)}")
+                    print(f"-1 client -> {address}")
                     break
                 else:
                     self.send_all_client(msg, name+": ")
@@ -100,12 +91,9 @@ class ServerIO(threading.Thread):
 
 if __name__ == "__main__":
     
-    server = ServerIO()
+    server = ServerIO(socket.AF_INET, socket.SOCK_STREAM)
 
-    #server.server_sock.listen(5)  # maximum : 5 instances de client
-    
-    print("Server on\n"+"-"*50)
+    print(f"Server on. {'-'*50}")
+    server.accept_() # bloquant jusqu'à fermeture du serveur
 
-    #server.start()
-    #server.join() # join pour attendre la fin du thread avant de fermer le socket
-    server.server_sock.close()
+    server.close() # socket.socket.close
