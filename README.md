@@ -6,4 +6,4 @@ This socket chat use threading module, not asyncio or async/await syntax yet.
 
 It's a basic software that I will sometimes improve in order to progress with socket and asynchronous functionality.
 
-Currently, the "only" requirement is `PyQt5`.
+Currently, the "only" requirement are `PyQt5` and `pyyaml`
