@@ -2,12 +2,13 @@ import socket
 import threading
 import sys
 import contextlib
-import json
+import yaml
 import webbrowser
 
 from PyQt5.QtWidgets import QLineEdit, QGridLayout, QFrame, QTextEdit, QListWidget, QListWidgetItem, QFormLayout, QMainWindow, QProgressBar, QWidget, QApplication, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QCheckBox, QPushButton, QDialog
 from PyQt5.QtGui import QIcon, QFont, QCursor, QBrush, QColor
 from PyQt5.QtCore import QRect, QSize, QTimer, QTime, QThread, pyqtSignal, Qt
+
 
 
 lock = threading.Lock()
@@ -26,8 +27,8 @@ class MWindow(QWidget, threading.Thread):
         QWidget.__init__(self)
         threading.Thread.__init__(self)
 
-        with open("config.json", "r") as file:
-            config = json.load(file)
+        with open("config.yaml", "r") as file:
+            config = yaml.load(file, Loader=yaml.Loader)
 
         HOST = config["HOST_CLIENT"]
         PORT = config["PORT"]
@@ -78,6 +79,15 @@ class MWindow(QWidget, threading.Thread):
 
         self.main_layout.addLayout(self.bar, 3, 0, 3, 0)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Enter:
+            print("QT KEY ENTER !")
+        elif event.key() == Qt.Key_Left:
+            print("QT KEY LEFT !")
+        else:
+            print("None")
+
+
     def initUi(self):
 
         self.listwidget = QListWidget()
@@ -119,7 +129,7 @@ class MWindow(QWidget, threading.Thread):
             self.count_label.setText(f"Tu es connecté depuis : {self.count.toString('hh:mm:ss')}")
 
 
-        self.count = QTime(00,00,00)
+        self.count = QTime(00, 00, 00)
 
         self.count_label = QLabel(f"Tu es connecté depuis : {self.count.toString('hh:mm:ss')}", self)
         self.count_label.setGeometry(QRect(500, 500, 100, 50))
