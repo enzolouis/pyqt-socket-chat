@@ -5,7 +5,6 @@ import socket
 # commentaire à refaire en anglais.
 
 class ServerIO(socket.socket):
-    clients = {}
 
     def __init__(self, *args, **kwargs):
         socket.socket.__init__(self, *args, **kwargs)
@@ -56,7 +55,6 @@ class ServerIO(socket.socket):
         self.send_all_client(f"--> {name} has joined the chat ! We are now {len(self.clients) + 1}")
 
         self.clients[client] = name
-        self.__class__.clients[client] = name
 
         self.send_all_client(f"<YOTfb3po7lBNv19in6yC> / {len(self.clients)}")
         while True:
@@ -71,7 +69,6 @@ class ServerIO(socket.socket):
                 elif msg == self.commands[0]:
                     client.close()
                     self.clients.pop(client)
-                    self.__class__.clients.pop(client)
                     self.send_all_client(f"{name} has left the chat.")
                     self.send_all_client(f"<YOTfb3po7lBNv19in6yC> / {len(self.clients)}")
                     print(f"-1 client -> {address}")
